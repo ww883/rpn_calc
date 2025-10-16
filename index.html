@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPN计算器 - C++代码展示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // Tailwind配置
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        dark: '#1D2129',
+                        light: '#F2F3F5',
+                        code: {
+                            bg: '#282C34',
+                            text: '#ABB2BF',
+                            keyword: '#C678DD',
+                            type: '#56B6C2',
+                            string: '#98C379',
+                            comment: '#7F848E',
+                            number: '#D19A66',
+                            function: '#61AFEF'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'Consolas', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .code-block {
+                @apply font-mono text-code-text bg-code-bg p-4 rounded-lg overflow-x-auto text-sm md:text-base;
+            }
+            .code-keyword {
+                @apply text-code-keyword;
+            }
+            .code-type {
+                @apply text-code-type;
+            }
+            .code-string {
+                @apply text-code-string;
+            }
+            .code-comment {
+                @apply text-code-comment;
+            }
+            .code-number {
+                @apply text-code-number;
+            }
+            .code-function {
+                @apply text-code-function;
+            }
+            .content-section {
+                @apply mb-8 p-6 bg-white rounded-xl shadow-sm;
+            }
+            .feature-card {
+                @apply p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-dark">
+    <!-- 顶部导航 -->
+    <header class="bg-primary text-white py-4 px-6 shadow-md">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <i class="fa fa-calculator text-2xl mr-3"></i>
+                <h1 class="text-2xl font-bold">RPN计算器 - C++实现</h1>
+            </div>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="#overview" class="hover:text-light transition-colors"><i class="fa fa-info-circle mr-1"></i> 功能概述</a></li>
+                    <li><a href="#code" class="hover:text-light transition-colors"><i class="fa fa-code mr-1"></i> 完整代码</a></li>
+                    <li><a href="#usage" class="hover:text-light transition-colors"><i class="fa fa-book mr-1"></i> 使用指南</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto py-8 px-4">
+        <!-- 功能概述 -->
+        <section id="overview" class="content-section">
+            <h2 class="text-2xl font-bold mb-4 text-primary">
+                <i class="fa fa-list-alt mr-2"></i>功能概述
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="feature-card">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <i class="fa fa-calculator text-primary mr-2"></i>基本运算
+                    </h3>
+                    <p>支持加减乘除（+、-、*、/）四则运算，自动处理运算优先级</p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <i class="fa fa-line-chart text-primary mr-2"></i>高级功能
+                    </h3>
+                    <p>包含平方根（sqrt）、幂运算（^）、斐波那契数列（fib）、杨辉三角行和（pascal）</p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <i class="fa fa-terminal text-primary mr-2"></i>交互模式
+                    </h3>
+                    <p>提供交互式操作界面，支持命令行控制（clear、show、history等）</p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <i class="fa fa-batch text-primary mr-2"></i>批量计算
+                    </h3>
+                    <p>支持批量处理多个RPN表达式，自动展示每个表达式的计算结果</p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <i class="fa fa-history text-primary mr-2"></i>历史记录
+                    </h3>
+                    <p>自动保存计算历史，支持查看和清空历史记录</p>
+                </div>
+                <div class="feature-card">
+                    <h3 class="font-bold text-lg mb-2 flex items-center">
+                        <i class="fa fa-bug text-primary mr-2"></i>调试模式
+                    </h3>
+                    <p>提供调试模式，显示计算过程中的栈操作和中间结果</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 完整代码 -->
+        <section id="code" class="content-section">
+            <h2 class="text-2xl font-bold mb-4 text-primary">
+                <i class="fa fa-code mr-2"></i>完整C++代码
+            </h2>
+            <div class="code-block">
+<pre><span class="code-include">#include &lt;iostream&gt;</span>
+<span class="code-include">#include &lt;stack&gt;</span>
+<span class="code-include">#include &lt;vector&gt;</span>
+<span class="code-include">#include &lt;string&gt;</span>
+<span class="code-include">#include &lt;sstream&gt;</span>
+<span class="code-include">#include &lt;cmath&gt;</span>
+<span class="code-include">#include &lt;stdexcept&gt;</span>
+<span class="code-include">#include &lt;map&gt;</span>
+<span class="code-include">#include &lt;iomanip&gt;</span>
+
+<span class="code-keyword">class</span> <span class="code-type">RPNCalculator</span> {
+<span class="code-keyword">private</span>:
+    std::stack&lt;double&gt; operands;
+    std::vector&lt;std::string&gt; history;
+    <span class="code-keyword">bool</span> debugMode;
+
+    <span class="code-comment">// 检查是否为运算符</span>
+    <span class="code-keyword">bool</span> <span class="code-function">isOperator</span>(<span class="code-keyword">const</span> std::string& token) {
+        <span class="code-keyword">return</span> token == <span class="code-string">"+"</span> || token == <span class="code-string">"-"</span> || token == <span class="code-string">"*"</span> || token == <span class="code-string">"/"</span> ||
+            token == <span class="code-string">"sqrt"</span> || token == <span class="code-string">"^"</span> || token == <span class="code-string">"fib"</span> || token == <span class="code-string">"pascal"</span>;
+    }
+
+    <span class="code-comment">// 检查是否为数字</span>
+    <span class="code-keyword">bool</span> <span class="code-function">isNumber</span>(<span class="code-keyword">const</span> std::string& token) {
+        std::istringstream iss(token);
+        <span class="code-type">double</span> value;
+        iss >> value;
+        <span class="code-keyword">return</span> !iss.fail() && iss.eof();
+    }
+
+    <span class="code-comment">// 处理四则运算</span>
+    <span class="code-keyword">void</span> <span class="code-function">handleBasicOperation</span>(<span class="code-keyword">const</span> std::string& op) {
+        <span class="code-keyword">if</span> (operands.size() &lt; 2) {
+            <span class="code-keyword">throw</span> std::runtime_error(<span class="code-string">"错误: 栈中操作数不足"</span>);
+        }
+
+        <span class="code-type">double</span> right = operands.top(); operands.pop();
+        <span class="code-type">double</span> left = operands.top(); operands.pop();
+        <span class="code-type">double</span> result;
+
+        <span class="code-keyword">if</span> (op == <span class="code-string">"+"</span>) result = left + right;
+        <span class="code-keyword">else</span> <span class="code-keyword">if</span> (op == <span class="code-string">"-"</span>) result = left - right;
+        <span class="code-keyword">else</span> <span class="code-keyword">if</span> (op == <span class="code-string">"*"</span>) result = left * right;
+        <span class="code-keyword">else</span> <span class="code-keyword">if</span> (op == <span class="code-string">"/"</span>) {
+            <span class="code-keyword">if</span> (right == 0) <span class="code-keyword">throw</span> std::runtime_error(<span class="code-string">"错误: 除零错误"</span>);
+            result = left / right;
+        }
+
+        operands.push(result);
+        <span class="code-keyword">if</span> (debugMode) {
+            std::cout &lt;&lt; <span class="code-string">"计算: "</span> &lt;&lt; left &lt;&lt; <span class="code-string">" "</span> &lt;&lt; op &lt;&lt; <span class="code-string">" "</span> &lt;&lt; right &lt;&lt; <span class="code-string">" = "</span> &lt;&lt; result &lt;&lt; std::endl;
+        }
+    }
+
+    <span class="code-comment">// 计算斐波那契数列</span>
+    <span class="code-type">double</span> <span class="code-function">fibonacci</span>(<span class="code-type">int</span> n) {
+        <span class="code-keyword">if</span> (n &lt; 0) <span class="code-keyword">throw</span> std::runtime_error(<span class="code-string">"错误: 斐波那契数列参数必须为非负整数"</span>);
+        <span class="code-keyword">if</span> (n == 0) <span class="code-keyword">return</span> 0;
+        <span class="code-keyword">if</span> (n == 1) <span class="code-keyword">return</span> 1;
+
+        <span class="code-type">double</span> a = 0, b = 1;
+        <span class="code-keyword">for</span> (<span class="code-type">int</span> i = 2; i &lt;= n; i++) {
+            <span class="code-type">double</span> temp = b;
+            b = a + b;
+            a = temp;
+        }
+        <span class="code-keyword">return</span> b;
+    }
+
+    <span class="code-comment">// 计算杨辉三角指定行和</span>
+    <span class="code-type">double</span> <span class="code-function">pascalTriangle</span>(<span class="code-type">int</span> n) {
+        <span class="code-keyword">if</span> (n &lt; 0) <span class="code-keyword">throw</span> std::runtime_error(<span class="code-string">"错误: 杨辉三角行数必须为非负整数"</span>);
+
+        <span class="code-type">double</span> sum = 0;
+        <span class="code-type">double</span> value = 1;
+        <span class="code-keyword">for</span> (<span class="code-type">int</span> k = 0; k &lt;= n; k++) {
+            sum += value;
+            value = value * (n - k) / (k + 1);
+        }
+        <span class="code-keyword">return</span> sum;
+    }
+
+<span class="code-keyword">public</span>:
+    <span class="code-function">RPNCalculator</span>() : debugMode(<span class="code-keyword">false</span>) {}
+
+    <span class="code-comment">// 设置调试模式</span>
+    <span class="code-keyword">void</span> <span class="code-function">setDebugMode</span>(<span class="code-keyword">bool</span> mode) {
+        debugMode = mode;
+    }
+
+    <span class="code-comment">// 清空栈</span>
+    <span class="code-keyword">void</span> <span class="code-function">clearStack</span>() {
+        <span class="code-keyword">while</span> (!operands.empty()) {
+            operands.pop();
+        }
+    }
+
+    <span class="code-comment">// 显示当前栈内容</span>
+    <span class="code-keyword">void</span> <span class="code-function">displayStack</span>() {
+        <span class="code-keyword">if</span> (operands.empty()) {
+            std::cout &lt;&lt; <span class="code-string">"栈为空"</span> &lt;&lt; std::endl;
+            <span class="code-keyword">return</span>;
+        }
+
+        std::stack&lt;double&gt; temp = operands;
+        std::vector&lt;double&gt; elements;
+
+        std::cout &lt;&lt; <span class="code-string">"当前栈内容 (从顶到底): "</span>;
+        <span class="code-keyword">while</span> (!temp.empty()) {
+            elements.push_back(temp.top());
+            temp.pop();
+        }
+
+        <span class="code-keyword">for</span> (<span class="code-keyword">auto</span> it = elements.rbegin(); it != elements.rend(); ++it) {
+            std::cout &lt;&lt; *it &lt;&lt; <span class="code-string">" "</span>;
+        }
+        std::cout &lt;&lt; std::endl;
+    }
+
+    <span class="code-comment">// 执行单个RPN表达式</span>
+    <span class="code-type">double</span> <span class="code-function">evaluateExpression</span>(<span class="code-keyword">const</span> std::string& expression) {
+        std::istringstream iss(expression);
+        std::string token;
+        std::vector&lt;std::string&gt; tokens;
+
+        <span class="code-comment">// 分割表达式为标记</span>
+        <span class="code-keyword">while</span> (iss >> token) {
+            tokens.push_back(token);
+        }
+
+        <span class="code-keyword">for</span> (<span class="code-keyword">const</span> <span class="code-keyword">auto</span>& t : tokens) {
+            <span class="code-keyword">if</span> (isNumber(t)) {
+                <span class="code-type">double</span> value = std::stod(t);
+                operands.push(value);
+                <span class="code-keyword">if</span> (debugMode) {
+                    std::cout &lt;&lt; <span class="code-string">"压入数字: "</span> &lt;&lt; value &lt;&lt; std::endl;
+                }
+            }
+            <span class="code-keyword">else</span> <span class="code-keyword">if</span> (isOperator(t)) {
+                <span class="code-keyword">if</span> (t == <span class="code-string">"sqrt"</span>) {
+                    <span class="code-keyword">if</span> (operands.empty()) <span class="code-keyword">throw</span> std::runtime_error(<span class="code-string">"错误: 栈为空"</span>);
+                    <span
